@@ -35,6 +35,8 @@ git -C "${REPO_ROOT}" push origin "${REPO_BRANCH}"
 
 ssh_run "if [ ! -d '${REMOTE_REPO_DIR}/.git' ]; then git clone --branch '${REPO_BRANCH}' '${REPO_URL}' '${REMOTE_REPO_DIR}'; else git -C '${REMOTE_REPO_DIR}' fetch origin && git -C '${REMOTE_REPO_DIR}' checkout '${REPO_BRANCH}' && git -C '${REMOTE_REPO_DIR}' pull --ff-only origin '${REPO_BRANCH}'; fi"
 
+ssh_run "mkdir -p \"$(dirname "${REMOTE_ENV_FILE}")\""
+
 ssh_run "cat > '${REMOTE_ENV_FILE}' <<'EOF'
 TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 OPENAI_API_KEY=${OPENAI_API_KEY:-}
