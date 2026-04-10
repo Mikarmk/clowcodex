@@ -1,0 +1,49 @@
+{
+  "gateway": {
+    "host": "127.0.0.1",
+    "port": ${CLOWCODEX_GATEWAY_PORT},
+    "logLevel": "info"
+  },
+  "acp": {
+    "enabled": true,
+    "dispatch": {
+      "enabled": true
+    },
+    "backend": "acpx",
+    "maxConcurrentSessions": 4
+  },
+  "agents": {
+    "list": [
+      {
+        "id": "main",
+        "default": true,
+        "workspace": "${CLOWCODEX_WORKDIR}",
+        "agentDir": "${CLOWCODEX_WORKDIR}",
+        "identity": {
+          "name": "ClowCodex"
+        },
+        "runtime": {
+          "type": "acp",
+          "acp": {
+            "agent": "codex",
+            "backend": "acpx",
+            "mode": "persistent",
+            "cwd": "${CLOWCODEX_WORKDIR}"
+          }
+        },
+        "tools": {
+          "profile": "coding"
+        }
+      }
+    ]
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "dmPolicy": "${CLOWCODEX_TELEGRAM_DM_POLICY}",
+      "allowFrom": ${CLOWCODEX_TELEGRAM_ALLOW_FROM_JSON},
+      "streaming": "partial"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+model = "${CLOWCODEX_CODEX_MODEL}"
+sandbox_mode = "workspace-write"
+approval_policy = "never"
+model_reasoning_effort = "${CLOWCODEX_CODEX_REASONING}"
+
+[history]
+persistence = "save-all"
+

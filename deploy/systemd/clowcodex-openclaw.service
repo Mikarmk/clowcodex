@@ -1,0 +1,29 @@
+[Unit]
+Description=ClowCodex OpenClaw Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__SERVICE_USER__
+Group=__SERVICE_GROUP__
+WorkingDirectory=__REPO_DIR__
+Environment=HOME=__HOME_DIR__
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=__ENV_FILE__
+ExecStart=/usr/bin/env openclaw gateway
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
+
