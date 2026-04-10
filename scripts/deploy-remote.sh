@@ -19,13 +19,23 @@ REPO_BRANCH="${REPO_BRANCH:-main}"
 REMOTE_REPO_DIR="${CLOWCODEX_REPO_DIR:-/opt/clowcodex/repo}"
 REMOTE_ENV_FILE="${CLOWCODEX_ENV_FILE:-/etc/clowcodex/clowcodex.env}"
 
-ssh -p "${SERVER_PORT}" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "mkdir -p '${REMOTE_REPO_DIR}'"
+SSH_BASE=(ssh -p "${SERVER_PORT}" -o StrictHostKeyChecking=no)
+if [[ -n "${SSH_PASSWORD:-}" ]]; then
+  export SSHPASS="${SSH_PASSWORD}"
+  SSH_BASE=(sshpass -e "${SSH_BASE[@]}")
+fi
+
+ssh_run() {
+  "${SSH_BASE[@]}" "${SERVER_USER}@${SERVER_HOST}" "$@"
+}
+
+ssh_run "mkdir -p '${REMOTE_REPO_DIR}'"
 
 git -C "${REPO_ROOT}" push origin "${REPO_BRANCH}"
 
-ssh -p "${SERVER_PORT}" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "if [ ! -d '${REMOTE_REPO_DIR}/.git' ]; then git clone --branch '${REPO_BRANCH}' '${REPO_URL}' '${REMOTE_REPO_DIR}'; else git -C '${REMOTE_REPO_DIR}' fetch origin && git -C '${REMOTE_REPO_DIR}' checkout '${REPO_BRANCH}' && git -C '${REMOTE_REPO_DIR}' pull --ff-only origin '${REPO_BRANCH}'; fi"
+ssh_run "if [ ! -d '${REMOTE_REPO_DIR}/.git' ]; then git clone --branch '${REPO_BRANCH}' '${REPO_URL}' '${REMOTE_REPO_DIR}'; else git -C '${REMOTE_REPO_DIR}' fetch origin && git -C '${REMOTE_REPO_DIR}' checkout '${REPO_BRANCH}' && git -C '${REMOTE_REPO_DIR}' pull --ff-only origin '${REPO_BRANCH}'; fi"
 
-ssh -p "${SERVER_PORT}" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "cat > '${REMOTE_ENV_FILE}' <<'EOF'
+ssh_run "cat > '${REMOTE_ENV_FILE}' <<'EOF'
 TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 OPENAI_API_KEY=${OPENAI_API_KEY:-}
 CLOWCODEX_SERVICE_USER=${CLOWCODEX_SERVICE_USER:-clowcodex}
@@ -44,5 +54,4 @@ REPO_BRANCH=${REPO_BRANCH}
 EOF
 chmod 600 '${REMOTE_ENV_FILE}'"
 
-ssh -p "${SERVER_PORT}" -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" "cd '${REMOTE_REPO_DIR}' && bash scripts/bootstrap-server.sh && REPO_ROOT='${REMOTE_REPO_DIR}' bash scripts/install-openclaw.sh && bash scripts/smoke-test.sh"
-
+ssh_run "cd '${REMOTE_REPO_DIR}' && bash scripts/bootstrap-server.sh && REPO_ROOT='${REMOTE_REPO_DIR}' bash scripts/install-openclaw.sh && bash scripts/smoke-test.sh"
